@@ -8,6 +8,7 @@ const DEFAULT_PARAMS = {
 };
 
 async function callOpenAI(apiKey, messages, extraParams = {}) {
+  console.log("CALL OPENAI API KEY:", apiKey ? "EXISTS" : "MISSING", "LENGTH:", apiKey?.length, "PREFIX:", apiKey?.substring(0, 5));
   if (!apiKey) throw new Error("OpenAI API Key is missing. Please add it in Settings.");
 
   const response = await fetch(OPENAI_API_URL, {

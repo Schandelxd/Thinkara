@@ -60,18 +60,26 @@ export const useStore = create((set, get) => ({
   initUserData: (userId, userEmail, userName) => {
     localStorage.setItem('thinkara_current_user_id', userId);
     
-    // Load per-user settings or fallback to globals
-    const userSettings = loadUserData('settings', {
+    // Default fallback settings
+    const defaultSettings = {
         fullName: userName || localStorage.getItem('thinkara_fullName') || 'Student',
         email: userEmail || localStorage.getItem('thinkara_email') || '',
-        openaiApiKey: localStorage.getItem('thinkara_openai_api_key') || process.env.REACT_APP_OPENAI_API_KEY || '',
+        openaiApiKey: localStorage.getItem('thinkara_openai_api_key') || (typeof process !== 'undefined' && process.env.REACT_APP_OPENAI_API_KEY) || '',
         theme: savedTheme,
         avatar: localStorage.getItem('thinkara_avatar') || '',
         notifications: true,
         studyReminders: true,
         weeklyReport: false,
         soundEffects: true,
-    });
+    };
+
+    // Load per-user settings and merge with defaults
+    let userSettings = loadUserData('settings', defaultSettings);
+    
+    // Enforce environment variable fallback if the loaded API key is empty
+    if (!userSettings.openaiApiKey) {
+        userSettings.openaiApiKey = defaultSettings.openaiApiKey;
+    }
 
     set({
       settings: userSettings,
