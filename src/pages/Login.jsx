@@ -30,65 +30,39 @@ export default function Login() {
     }
   };
 
-  // Loading state with Orbit animation
+  // Loading state with Premium animation
   if (isLoading && !loginSuccess && !error) {
     return (
       <div className="auth-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div className="loading-orbit" style={{ margin: '0 auto 32px' }}>
-            <div className="loading-logo-ring" />
-            <div className="orbit-dot" />
-            <div className="orbit-dot" />
-            <div className="orbit-dot" />
+        <div className="premium-loading-container">
+          <div className="premium-logo-wrapper">
             <img 
               src="/logo.png" 
-              alt="Thinkara"
-              style={{ width: '40px', height: '40px', position: 'relative', zIndex: 2 }}
+              alt="Thinkara Logo"
+              className="premium-logo"
             />
           </div>
-          <h2 style={{ fontSize: '24px', fontWeight: 800, animation: 'fadeIn 1s ease-in-out infinite alternate' }}>
-            Authenticating...
-          </h2>
-          <p style={{ color: 'var(--gray-500)', marginTop: '8px', fontWeight: 500 }}>
-            Preparing your study session
+          <div className="premium-loading-text">
+            <span>Authenticating</span>
+            <span className="premium-loading-dots"></span>
+          </div>
+          <p style={{ color: 'var(--gray-500)', marginTop: '8px', fontWeight: 500, animation: 'fadeInUp 0.6s ease-out 0.2s both' }}>
+            Preparing your study session...
           </p>
         </div>
       </div>
     );
   }
 
-  // Success animation screen
+  // Premium Success Overlay
   if (loginSuccess) {
     return (
-      <div className="auth-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center', animation: 'fadeInScale 0.5s ease-out' }}>
-          <div style={{ 
-            width: '100px', height: '100px', borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 24px', border: '3px solid var(--border-color)',
-            boxShadow: 'var(--shadow-hard)', animation: 'popIn 0.6s ease-out',
-          }}>
-            <Sparkles size={48} color="white" />
-          </div>
-          <h1 style={{ fontSize: '32px', marginBottom: '8px', animation: 'fadeInUp 0.4s ease-out 0.3s both' }}>
-            Welcome back! ✨
-          </h1>
-          <p style={{ color: 'var(--gray-500)', fontWeight: 600, animation: 'fadeInUp 0.4s ease-out 0.5s both' }}>
-            Loading your study dashboard...
-          </p>
-          <div style={{ 
-            width: '200px', height: '4px', borderRadius: '999px', backgroundColor: 'var(--gray-200)',
-            margin: '24px auto 0', overflow: 'hidden', animation: 'fadeInUp 0.4s ease-out 0.6s both'
-          }}>
-            <div style={{ 
-              width: '100%', height: '100%', borderRadius: '999px',
-              background: 'linear-gradient(90deg, var(--primary), var(--secondary), var(--tertiary))',
-              animation: 'shimmer 1s linear infinite',
-              backgroundSize: '200% 100%',
-            }} />
-          </div>
+      <div className="success-overlay">
+        <div className="success-icon-wrapper">
+          <Sparkles size={40} color="white" />
         </div>
+        <h1 className="success-text">Welcome back!</h1>
+        <p className="success-subtext">Taking you to your dashboard</p>
       </div>
     );
   }

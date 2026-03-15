@@ -38,7 +38,7 @@ export const useStore = create((set, get) => ({
   settings: {
     fullName: 'Student',
     email: '',
-    openaiApiKey: '',
+    openaiApiKey: typeof process !== 'undefined' && process.env.REACT_APP_OPENAI_API_KEY ? process.env.REACT_APP_OPENAI_API_KEY : '',
     theme: savedTheme,
     avatar: '',
     notifications: true,
@@ -64,7 +64,7 @@ export const useStore = create((set, get) => ({
     const userSettings = loadUserData('settings', {
         fullName: userName || localStorage.getItem('thinkara_fullName') || 'Student',
         email: userEmail || localStorage.getItem('thinkara_email') || '',
-        openaiApiKey: localStorage.getItem('thinkara_openai_api_key') || '',
+        openaiApiKey: localStorage.getItem('thinkara_openai_api_key') || process.env.REACT_APP_OPENAI_API_KEY || '',
         theme: savedTheme,
         avatar: localStorage.getItem('thinkara_avatar') || '',
         notifications: true,
