@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { User, Bell, Shield, Key, Palette, Camera, Sun, Moon, Sparkles, Zap, Check, Save, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { User, Bell, Shield, Key, Palette, Camera, Sun, Moon, Sparkles, Zap, Check, Save, Eye, EyeOff, Trash2, Database } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
 const THEMES = [

@@ -1,88 +1,82 @@
-# Thinkara 🧠
+# Thinkara 🧠✨
+### *Transform Your Notes into Knowledge with AI*
 
-Thinkara is an AI-powered study assistant designed to help students turn notes into interactive summaries, flashcards, quizzes, and personalized study plans. Featuring a smart learning dashboard, detailed analytics, and organizational tools, Thinkara makes studying faster, more structured, and highly efficient. 
-
-## Features ✨
-
-*   **AI Summaries:** Instantly digest long notes into concise, easy-to-read summaries.
-*   **Smart Flashcards:** Automatically generate flashcards from your study materials for active recall.
-*   **Auto-Quizzes:** Test your knowledge with AI-generated quizzes tailored to your content.
-*   **Study Plans:** Create personalized, structured study schedules.
-*   **Learning Dashboard:** Track your progress and view detailed analytics.
-*   **Organization:** Keep everything organized with intuitive board-based workflows.
-
-## Tech Stack 🛠️
-
-*   **Frontend:** React, Tailwind CSS, Lucide React
-*   **Backend & Auth:** Supabase (Database, Authentication)
-*   **AI Integration:** OpenAI API
+Thinkara is a premium, AI-powered study companion designed to supercharge your learning. Effortlessly turn your static notes and PDFs into interactive study materials, manage your schedule with a dynamic planner, and track your growth with advanced analytics.
 
 ---
 
-## 🚀 Running Thinkara Locally
+## 🚀 Key Features
 
-Follow these step-by-step instructions to set up and run Thinkara on your local machine.
+| Feature | Description |
+| :--- | :--- |
+| **🧠 AI Flashcards** | Automatically generate smart flashcards using Active Recall technology. |
+| **📝 Auto-Quizzes** | Instantly create customized quizzes to test your mastery of any topic. |
+| **📊 Smart Analytics** | Visualize your learning progress with beautiful, interactive charts. |
+| **📅 Study Planner** | Organize your study sessions with a sleek, sticker-based calendar system. |
+| **💬 AI Assistant** | A context-aware tutor that responds to your queries in real-time. |
+| **🎨 Custom Themes** | Personalize your experience with elegant Light and Dark modes. |
 
-### Prerequisites
+---
 
-1.  **Node.js**: Ensure you have Node.js installed (v16 or higher recommended).
-2.  **Supabase Account**: You'll need a free account at [Supabase](https://supabase.com/) to set up the database and authentication.
-3.  **OpenAI API Key**: You'll need an active [OpenAI API Key](https://platform.openai.com/api-keys) to power the AI features.
+## 🛠️ Tech Stack
 
-### Step 1: Clone the Repository
+- **Frontend:** [React](https://reactjs.org/) + [Vite](https://vitejs.dev/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/) & [Lucide React](https://lucide.dev/)
+- **State Management:** [Zustand](https://github.com/pmndrs/zustand)
+- **Backend:** [Supabase](https://supabase.com/) (Auth, Database, Storage)
+- **AI Engine:** [OpenAI GPT-4o](https://openai.com/)
 
-Clone the project to your local machine:
+---
 
+## 🏁 Getting Started (Step-by-Step)
+
+Follow these steps to set up Thinkara on your local machine and start studying smarter.
+
+### 1️⃣ Clone the Repository
 ```bash
 git clone https://github.com/Schandelxd/Thinkara.git
 cd Thinkara
 ```
 
-### Step 2: Install Dependencies
-
-Run the following command to install all required packages:
-
+### 2️⃣ Install Dependencies
+Ensure you have [Node.js](https://nodejs.org/) installed, then run:
 ```bash
 npm install
 ```
 
-### Step 3: Set up Supabase
+### 3️⃣ Configure Environment Variables
+1. Duplicate the `.env.example` file:
+   ```bash
+   cp .env.example .env
+   ```
+2. Open `.env` and fill in your credentials from Supabase and OpenAI:
+   ```ini
+   REACT_APP_SUPABASE_URL=https://your-project.supabase.co
+   REACT_APP_SUPABASE_ANON_KEY=your-anon-key
+   REACT_APP_OPENAI_API_KEY=your-openai-key
+   ```
+   *Note: You can also configure these keys directly within the App's **Settings UI** for convenience.*
 
-1.  Go to [Supabase](https://supabase.com/) and create a new project.
-2.  Wait for the database to be provisioned.
-3.  Navigate to **Project Settings** -> **API**.
-4.  Copy your **Project URL** and your **anon/public Key**.
+### 4️⃣ Database Setup (Supabase)
+Initialize your Supabase project with following tables:
+- `users` (Managed by Supabase Auth)
+- `materials` (Stored in Supabase Storage & Database)
+- `flashcards` & `quizzes`
+- `sessions` (For study tracking)
 
-You will also need to set up Authentication (e.g., enable Email/Password login) and create the necessary tables in the Supabase SQL Editor based on the application's data models (e.g., users, notes, flashcards, quizzes).
-
-### Step 4: Configure Environment Variables
-
-1.  In the root folder of the project, duplicate the `.env.example` file and rename it to `.env`.
-2.  Open the `.env` file and fill in your keys:
-
-```ini
-REACT_APP_SUPABASE_URL=your_supabase_url_here
-REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key_here
-REACT_APP_OPENAI_API_KEY=your_openai_api_key_here
-```
-*(Replace the placeholder text with your actual keys. Ensure there are no spaces around the `=` sign).*
-
-### Step 5: Start the Development Server
-
-Start the application locally:
-
+### 5️⃣ Launch the App
 ```bash
-npm start
+npm run dev
 ```
-
-The app should now be running in your browser at `http://localhost:3000`. 
+Open [http://localhost:5173](http://localhost:5173) in your browser to see the magic happen! 🚀
 
 ---
 
-### Contributing
+## 🤝 Contributing
+We welcome contributions! Please fork the repository, make your changes, and submit a PR.
 
-Feel free to fork the repository and submit pull requests to help improve Thinkara!
+## 📄 License
+Thinkara is licensed under the [MIT License](LICENSE). 
 
-### License
-
-This project is open-source and available under the standard MIT License.
+---
+Developed with ❤️ for curious minds everywhere.
