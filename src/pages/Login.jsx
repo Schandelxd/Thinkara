@@ -32,7 +32,7 @@ export default function Login() {
       await signIn(email, password);
       playSound('success');
       setLoginSuccess(true);
-      setTimeout(() => navigate('/app'), 1500);
+      setTimeout(() => navigate('/app'), 2500);
     } catch (err) {
       if (err.message && err.message.toLowerCase().includes('email not confirmed')) {
         setError('Please verify your email address first. You can sign up again to receive a new code.');

@@ -112,7 +112,7 @@ export default function Flashcards() {
                         {isSelected && <CheckCircle2 size={14} color="white" />}
                       </div>
                       <div>
-                        <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '4px', lineHeight: 1.3 }}>{m.title}</h3>
+                        <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '4px', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.title}</h3>
                         <p style={{ fontSize: '12px', color: 'var(--gray-500)', fontWeight: 500 }}>{m.type} • {m.wordCount?.toLocaleString()} words</p>
                       </div>
                     </div>

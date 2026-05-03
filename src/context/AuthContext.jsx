@@ -136,6 +136,19 @@ export function AuthProvider({ children }) {
       localStorage.removeItem('thinkara_current_user_id');
     }
     
+    // Attempt to delete user via RPC function in Supabase.
+    // NOTE: This requires creating the following function in the Supabase SQL editor:
+    // create or replace function delete_user() returns void as $$
+    // begin
+    //   delete from auth.users where id = auth.uid();
+    // end;
+    // $$ language plpgsql security definer;
+    try {
+      await supabase.rpc('delete_user');
+    } catch (e) {
+      console.warn("RPC delete_user failed or not found.", e);
+    }
+
     // Sign out (account deletion from Supabase requires server-side admin API)
     const { error } = await supabase.auth.signOut();
     if (error) throw error;

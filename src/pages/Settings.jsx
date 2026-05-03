@@ -26,6 +26,12 @@ export default function Settings() {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
 
+  // CAPTCHA state
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
+  const [captchaExpected, setCaptchaExpected] = useState(0);
+  const [captchaQuestion, setCaptchaQuestion] = useState('');
+
   const handleSave = () => {
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -59,8 +65,20 @@ export default function Settings() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (window.confirm('CRITICAL WARNING: This will permanently delete your account, API key, and all study materials. This action CANNOT be undone. Are you absolutely sure?')) {
+  const initiateDelete = () => {
+    const a = Math.floor(Math.random() * 10) + 1;
+    const b = Math.floor(Math.random() * 10) + 1;
+    setCaptchaExpected(a + b);
+    setCaptchaQuestion(`What is ${a} + ${b}?`);
+    setShowCaptcha(true);
+  };
+
+  const confirmDeleteAccount = async () => {
+    if (parseInt(captchaAnswer) !== captchaExpected) {
+      alert("Incorrect CAPTCHA answer. Please try again.");
+      return;
+    }
+    if (window.confirm('FINAL WARNING: This is irreversible. Confirm deletion?')) {
       try {
         await deleteAccount();
         navigate('/');
@@ -339,14 +357,33 @@ export default function Settings() {
                     <Trash2 size={16} /> Clear Data
                   </button>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderRadius: '12px', border: '2px solid #FEE2E2', backgroundColor: '#FEF2F2' }}>
-                  <div>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px', color: '#EF4444' }}>Delete Account</h3>
-                    <p style={{ fontSize: '14px', color: 'var(--gray-500)', fontWeight: 500 }}>Permanently delete your account and all data. This cannot be undone.</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px', borderRadius: '12px', border: '2px solid #FEE2E2', backgroundColor: '#FEF2F2' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px', color: '#EF4444' }}>Delete Account</h3>
+                      <p style={{ fontSize: '14px', color: 'var(--gray-500)', fontWeight: 500 }}>Permanently delete your account and all data. This cannot be undone.</p>
+                    </div>
+                    {!showCaptcha && (
+                      <button className="btn-secondary" onClick={initiateDelete} style={{ backgroundColor: '#FEE2E2', color: '#EF4444', borderColor: '#EF4444', padding: '8px 16px', fontSize: '14px', flexShrink: 0 }}>
+                        Delete Account
+                      </button>
+                    )}
                   </div>
-                  <button className="btn-secondary" onClick={handleDeleteAccount} style={{ backgroundColor: '#FEE2E2', color: '#EF4444', borderColor: '#EF4444', padding: '8px 16px', fontSize: '14px' }}>
-                    Delete Account
-                  </button>
+                  
+                  {showCaptcha && (
+                    <div style={{ marginTop: '8px', padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '2px solid #FEE2E2', animation: 'fadeInUp 0.3s ease-out' }}>
+                      <p style={{ fontWeight: 700, color: '#EF4444', marginBottom: '12px', fontSize: '14px' }}>Security Check: Please solve this math problem to continue.</p>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        <span style={{ fontWeight: 800, fontSize: '18px' }}>{captchaQuestion}</span>
+                        <input type="number" className="input-base" style={{ width: '80px', padding: '8px', borderColor: '#EF4444' }} 
+                          value={captchaAnswer} onChange={(e) => setCaptchaAnswer(e.target.value)} placeholder="?" />
+                        <button className="btn-secondary" onClick={confirmDeleteAccount} disabled={!captchaAnswer} style={{ backgroundColor: '#EF4444', color: 'white', borderColor: '#EF4444', padding: '8px 16px', fontSize: '14px' }}>
+                          Confirm Delete
+                        </button>
+                        <button onClick={() => { setShowCaptcha(false); setCaptchaAnswer(''); }} style={{ color: 'var(--gray-500)', fontSize: '14px', fontWeight: 600, padding: '8px' }}>Cancel</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </section>
