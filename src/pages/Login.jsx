@@ -35,7 +35,7 @@ export default function Login() {
       setTimeout(() => navigate('/app'), 2500);
     } catch (err) {
       if (err.message && err.message.toLowerCase().includes('email not confirmed')) {
-        setError('Please verify your email address first. You can sign up again to receive a new code.');
+        setError('Please verify your email before logging in.');
       } else {
         setError(err.message || 'Login failed. Please check your credentials.');
       }

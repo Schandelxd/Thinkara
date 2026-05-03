@@ -59,7 +59,9 @@ export default function Signup() {
     try {
       await signUp(email, password, fullName);
       setStage('verification');
-      setResendCooldown(60); // 60s cooldown
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
     } catch (err) {
       setError(err.message || 'Signup failed. Please try again.');
     } finally {
@@ -177,70 +179,18 @@ export default function Signup() {
             <Mail size={28} color="var(--primary)" />
           </div>
           
-          <h1 className="stagger-1" style={{ fontSize: '28px', marginBottom: '8px', textAlign: 'center' }}>Check your email</h1>
-          <p className="stagger-2" style={{ color: 'var(--gray-500)', fontWeight: 500, marginBottom: '32px', textAlign: 'center', fontSize: '15px', lineHeight: 1.5 }}>
-            We sent a 6-digit verification code to<br/>
-            <strong style={{ color: 'var(--fg)' }}>{email}</strong>
+          <h1 className="stagger-1" style={{ fontSize: '28px', marginBottom: '16px', textAlign: 'center' }}>Check your email</h1>
+          <p className="stagger-2" style={{ color: 'var(--gray-500)', fontWeight: 500, marginBottom: '24px', textAlign: 'center', fontSize: '15px', lineHeight: 1.5 }}>
+            A verification link has been sent to your email.<br/>
+            Please verify your account before logging in.
           </p>
 
-          {error && (
-            <div style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', marginBottom: '20px', backgroundColor: '#FEE2E2', border: '2px solid #EF4444', color: '#DC2626', fontSize: '14px', fontWeight: 600, animation: 'fadeInUp 0.2s ease-out' }}>
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleVerify} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            
-            <div className="stagger-3" style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }} onPaste={handlePaste}>
-              {otp.map((digit, index) => (
-                <input
-                  key={index}
-                  ref={(el) => (otpRefs.current[index] = el)}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleOtpChange(index, e.target.value)}
-                  onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                  disabled={isLoading}
-                  style={{
-                    width: '48px', height: '56px', fontSize: '24px', fontWeight: 800, textAlign: 'center',
-                    borderRadius: '12px', border: `2px solid ${digit ? 'var(--primary)' : 'var(--border-color)'}`,
-                    backgroundColor: 'var(--card-bg)', color: 'var(--fg)', outline: 'none',
-                    transition: 'all 0.2s', boxShadow: digit ? '2px 2px 0 var(--primary)' : 'none'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = 'var(--primary)';
-                    e.target.style.boxShadow = '2px 2px 0 var(--primary)';
-                  }}
-                  onBlur={(e) => {
-                    if (!digit) {
-                      e.target.style.borderColor = 'var(--border-color)';
-                      e.target.style.boxShadow = 'none';
-                    }
-                  }}
-                />
-              ))}
-            </div>
-
-            <button type="submit" className="btn-primary stagger-4" disabled={isLoading || otp.join('').length !== 6}
-              style={{ width: '100%', padding: '14px', fontSize: '18px', opacity: (isLoading || otp.join('').length !== 6) ? 0.7 : 1 }}>
-              {isLoading ? <><Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> Verifying...</> : <><Sparkles size={20} /> Verify Account</>}
-            </button>
-          </form>
-
-          <div className="stagger-4" style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-            <button 
-              type="button" 
-              onClick={handleResend}
-              disabled={resendCooldown > 0 || isLoading}
-              style={{ color: resendCooldown > 0 ? 'var(--gray-400)' : 'var(--primary)', fontWeight: 700, fontSize: '14px', transition: 'color 0.2s' }}
-            >
-              {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend Code'}
-            </button>
-            <button onClick={() => setStage('details')} style={{ color: 'var(--gray-500)', fontSize: '14px', fontWeight: 600 }}>
-              ← Change Email
-            </button>
+          <p className="stagger-3" style={{ color: 'var(--gray-400)', fontWeight: 600, fontSize: '14px', marginBottom: '24px' }}>
+            Redirecting to login in 3 seconds...
+          </p>
+          
+          <div className="stagger-4">
+             <Loader2 size={24} style={{ color: 'var(--primary)', animation: 'spin 1s linear infinite' }} />
           </div>
 
         </div>
