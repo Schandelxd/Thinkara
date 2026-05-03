@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
-import { User, Bell, Shield, Key, Palette, Camera, Sun, Moon, Sparkles, Zap, Check, Save, Eye, EyeOff, Trash2, Database } from 'lucide-react';
+import { User, Bell, Shield, Key, Palette, Camera, Sun, Moon, Sparkles, Zap, Check, Save, Eye, EyeOff, Trash2, Lock } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const THEMES = [
   { key: 'light', label: 'Light', icon: Sun, preview: 'linear-gradient(135deg, #FFFDF5, #FFF8E7)', desc: 'Clean & bright' },
@@ -9,14 +11,20 @@ const THEMES = [
   { key: 'midnight', label: 'Midnight', icon: Sparkles, preview: 'linear-gradient(135deg, #0C1222, #162032)', desc: 'Deep & focused' },
 ];
 
-const AVATAR_COLORS = ['#8B5CF6', '#F472B6', '#FBBF24', '#34D399', '#3B82F6', '#EF4444', '#F97316', '#06B6D4'];
-
 export default function Settings() {
+  const navigate = useNavigate();
   const { settings, updateSettings, setApiKey } = useStore();
+  const { user, updatePassword, deleteAccount } = useAuth();
+  
   const [showApiKey, setShowApiKey] = useState(false);
   const [saved, setSaved] = useState(false);
   const [activeSection, setActiveSection] = useState('profile');
   const fileInputRef = useRef(null);
+
+  // Password state
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
 
   const handleSave = () => {
     setSaved(true);
@@ -33,13 +41,61 @@ export default function Settings() {
     reader.readAsDataURL(file);
   };
 
-  const initials = settings.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+    if (newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters.');
+      return;
+    }
+    try {
+      await updatePassword(newPassword);
+      setPasswordSuccess('Password updated successfully!');
+      setNewPassword('');
+      setTimeout(() => setPasswordSuccess(''), 3000);
+    } catch (err) {
+      setPasswordError(err.message || 'Failed to update password.');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm('CRITICAL WARNING: This will permanently delete your account, API key, and all study materials. This action CANNOT be undone. Are you absolutely sure?')) {
+      try {
+        await deleteAccount();
+        navigate('/');
+      } catch (err) {
+        alert('Failed to delete account. Please try again later.');
+      }
+    }
+  };
+
+  const handleClearData = () => {
+    if (window.confirm('Are you sure you want to clear all your local study data? Your account will remain active.')) {
+        const userId = user?.id;
+        if (userId) {
+          const keysToRemove = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            // Don't remove settings, just data
+            if (key && key.startsWith(`thinkara_${userId}_`) && !key.includes('settings')) {
+              keysToRemove.push(key);
+            }
+          }
+          keysToRemove.forEach(k => localStorage.removeItem(k));
+          window.location.reload();
+        }
+    }
+  }
+
+  const initials = settings.fullName?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
 
   const sections = [
     { key: 'profile', label: 'Profile', icon: User },
     { key: 'appearance', label: 'Appearance', icon: Palette },
     { key: 'notifications', label: 'Notifications', icon: Bell },
     { key: 'api', label: 'API & Integration', icon: Key },
+    { key: 'security', label: 'Security', icon: Lock },
     { key: 'danger', label: 'Danger Zone', icon: Shield },
   ];
 
@@ -78,7 +134,6 @@ export default function Settings() {
             <section className="sticker-card" style={{ padding: '32px', animation: 'fadeInUp 0.3s ease-out' }}>
               <h2 style={{ fontSize: '24px', marginBottom: '32px' }}>Profile Details</h2>
               
-              {/* Avatar */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '32px' }}>
                 <div style={{ position: 'relative' }}>
                   {settings.avatar ? (
@@ -109,8 +164,8 @@ export default function Settings() {
                   <input type="text" className="input-base" value={settings.fullName} onChange={(e) => updateSettings({ fullName: e.target.value })} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontWeight: 700, fontSize: '14px' }}>Email Address</label>
-                  <input type="email" className="input-base" value={settings.email} onChange={(e) => updateSettings({ email: e.target.value })} />
+                  <label style={{ fontWeight: 700, fontSize: '14px', color: 'var(--gray-400)' }}>Email Address (Verified)</label>
+                  <input type="email" className="input-base" value={settings.email} readOnly disabled style={{ backgroundColor: 'var(--gray-100)', color: 'var(--gray-500)', cursor: 'not-allowed', opacity: 0.8 }} />
                 </div>
               </div>
               <button className="btn-primary" style={{ marginTop: '24px' }} onClick={handleSave}>
@@ -169,7 +224,7 @@ export default function Settings() {
                 { key: 'notifications', label: 'Email Notifications', desc: 'Receive daily study reminders.' },
                 { key: 'studyReminders', label: 'Study Reminders', desc: 'Get push reminders before scheduled sessions.' },
                 { key: 'weeklyReport', label: 'Weekly Progress Report', desc: 'Receive a weekly summary of your analytics.' },
-                { key: 'soundEffects', label: 'Sound Effects', desc: 'Play sounds on quiz answers and flashcard flips.' },
+                { key: 'soundEffects', label: 'Sound Effects', desc: 'Play sounds on notifications, quizzes and flashcards.' },
               ].map((pref, i) => (
                 <div key={pref.key}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0' }}>
@@ -209,7 +264,7 @@ export default function Settings() {
                 </div>
               </div>
               
-              <div style={{ position: 'relative' }}>
+              <div style={{ position: 'relative', marginBottom: '16px' }}>
                 <input type={showApiKey ? 'text' : 'password'} className="input-base" placeholder="sk-proj-..." 
                   value={settings.openaiApiKey} onChange={(e) => setApiKey(e.target.value)}
                   style={{ borderColor: 'var(--primary)', paddingRight: '48px' }} />
@@ -218,9 +273,48 @@ export default function Settings() {
                   {showApiKey ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              <p style={{ fontSize: '12px', color: 'var(--gray-400)', fontWeight: 500, marginTop: '8px' }}>
-                🔒 Stored securely in your browser's local storage. Never sent to our servers.
-              </p>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                 <p style={{ fontSize: '13px', color: 'var(--quaternary)', fontWeight: 600 }}>
+                   🔒 Encrypted and stored securely in your browser. Not accessible by other users.
+                 </p>
+                 <button onClick={() => setApiKey('')} style={{ color: '#EF4444', fontSize: '13px', fontWeight: 600 }}>
+                   Remove Key
+                 </button>
+              </div>
+            </section>
+          )}
+
+          {/* Security Section */}
+          {activeSection === 'security' && (
+            <section className="sticker-card" style={{ padding: '32px', animation: 'fadeInUp 0.3s ease-out' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--card-bg-alt)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--fg)' }}>
+                  <Lock size={20} color="var(--primary)" />
+                </div>
+                <h2 style={{ fontSize: '24px' }}>Change Password</h2>
+              </div>
+
+              {passwordError && (
+                <div style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', marginBottom: '20px', backgroundColor: '#FEE2E2', border: '2px solid #EF4444', color: '#DC2626', fontSize: '14px', fontWeight: 600 }}>
+                  {passwordError}
+                </div>
+              )}
+              {passwordSuccess && (
+                <div style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', marginBottom: '20px', backgroundColor: '#D1FAE5', border: '2px solid #10B981', color: '#059669', fontSize: '14px', fontWeight: 600 }}>
+                  {passwordSuccess}
+                </div>
+              )}
+
+              <form onSubmit={handleUpdatePassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '400px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontWeight: 700, fontSize: '14px' }}>New Password</label>
+                  <input type="password" placeholder="Min 6 characters" className="input-base" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                </div>
+                <button type="submit" className="btn-primary" style={{ width: 'max-content' }}>
+                   Update Password
+                </button>
+              </form>
             </section>
           )}
 
@@ -237,20 +331,20 @@ export default function Settings() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderRadius: '12px', border: '2px solid var(--gray-200)' }}>
                   <div>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>Clear All Data</h3>
-                    <p style={{ fontSize: '14px', color: 'var(--gray-500)', fontWeight: 500 }}>Remove all materials, flashcards, quizzes, and scores.</p>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>Clear Local Data</h3>
+                    <p style={{ fontSize: '14px', color: 'var(--gray-500)', fontWeight: 500 }}>Remove all materials, flashcards, quizzes, and scores from this device.</p>
                   </div>
                   <button className="btn-secondary" style={{ color: '#EF4444', borderColor: '#EF4444', padding: '8px 16px', fontSize: '14px' }}
-                    onClick={() => { if (window.confirm('Are you sure? This will delete all your data.')) { localStorage.clear(); window.location.reload(); } }}>
+                    onClick={handleClearData}>
                     <Trash2 size={16} /> Clear Data
                   </button>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderRadius: '12px', border: '2px solid #FEE2E2', backgroundColor: '#FEF2F2' }}>
                   <div>
                     <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px', color: '#EF4444' }}>Delete Account</h3>
-                    <p style={{ fontSize: '14px', color: 'var(--gray-500)', fontWeight: 500 }}>Permanently delete your account and all data.</p>
+                    <p style={{ fontSize: '14px', color: 'var(--gray-500)', fontWeight: 500 }}>Permanently delete your account and all data. This cannot be undone.</p>
                   </div>
-                  <button className="btn-secondary" style={{ backgroundColor: '#FEE2E2', color: '#EF4444', borderColor: '#EF4444', padding: '8px 16px', fontSize: '14px' }}>
+                  <button className="btn-secondary" onClick={handleDeleteAccount} style={{ backgroundColor: '#FEE2E2', color: '#EF4444', borderColor: '#EF4444', padding: '8px 16px', fontSize: '14px' }}>
                     Delete Account
                   </button>
                 </div>

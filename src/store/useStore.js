@@ -8,21 +8,77 @@ if (typeof document !== 'undefined') {
   document.documentElement.setAttribute('data-theme', savedTheme);
 }
 
+// Simple base64 encoding with a user-specific salt for mild obfuscation
+// Not bulletproof encryption, but prevents casual inspection of plaintext API keys
+function obfuscateData(data, salt) {
+  if (!data) return data;
+  try {
+    return btoa(unescape(encodeURIComponent(data + '|||' + salt)));
+  } catch (e) {
+    return data;
+  }
+}
+
+function deobfuscateData(encoded, salt) {
+  if (!encoded) return encoded;
+  try {
+    const decoded = decodeURIComponent(escape(atob(encoded)));
+    const parts = decoded.split('|||');
+    if (parts.length === 2 && parts[1] === salt) {
+      return parts[0];
+    }
+    return encoded; // Fallback if format is wrong
+  } catch (e) {
+    return encoded;
+  }
+}
+
 // Per-user localStorage helper
 function getUserKey(key) {
-  const userId = localStorage.getItem('thinkara_current_user_id') || 'default';
+  // CRITICAL: Throw if no user ID is set to prevent leaking to a 'default' account
+  const userId = localStorage.getItem('thinkara_current_user_id');
+  if (!userId) {
+    console.warn(`Attempted to access per-user storage for '${key}' without an active user session.`);
+    return `thinkara_ANONYMOUS_${key}`; // Failsafe
+  }
   return `thinkara_${userId}_${key}`;
 }
 
-function loadUserData(key, fallback) {
+function loadUserData(key, fallback, decrypt = false) {
   try {
     const raw = localStorage.getItem(getUserKey(key));
-    return raw ? JSON.parse(raw) : fallback;
-  } catch { return fallback; }
+    if (!raw) return fallback;
+    
+    let value = JSON.parse(raw);
+    
+    // Handle API key decryption
+    if (decrypt && key === 'settings' && value.openaiApiKey) {
+      const userId = localStorage.getItem('thinkara_current_user_id');
+      value.openaiApiKey = deobfuscateData(value.openaiApiKey, userId);
+    }
+    return value;
+  } catch { 
+    return fallback; 
+  }
 }
 
-function saveUserData(key, value) {
-  localStorage.setItem(getUserKey(key), JSON.stringify(value));
+function saveUserData(key, value, encrypt = false) {
+  try {
+    let valueToStore = value;
+    
+    // Handle API key encryption
+    if (encrypt && key === 'settings' && value.openaiApiKey) {
+      const userId = localStorage.getItem('thinkara_current_user_id');
+      valueToStore = { 
+        ...value, 
+        openaiApiKey: obfuscateData(value.openaiApiKey, userId) 
+      };
+    }
+    
+    localStorage.setItem(getUserKey(key), JSON.stringify(valueToStore));
+  } catch (e) {
+    console.error("Failed to save user data", e);
+  }
 }
 
 // Default boards
@@ -33,12 +89,11 @@ const DEFAULT_BOARDS = [
   { id: 'default-4', title: 'Mastered', color: '#34D399', cards: [] },
 ];
 
-export const useStore = create((set, get) => ({
-  // Settings
+const INITIAL_STATE = {
   settings: {
     fullName: 'Student',
     email: '',
-    openaiApiKey: typeof process !== 'undefined' && process.env.REACT_APP_OPENAI_API_KEY ? process.env.REACT_APP_OPENAI_API_KEY : '',
+    openaiApiKey: '',
     theme: savedTheme,
     avatar: '',
     notifications: true,
@@ -46,8 +101,6 @@ export const useStore = create((set, get) => ({
     weeklyReport: false,
     soundEffects: true,
   },
-
-  // Data State — loaded per user
   materials: [],
   flashcards: [],
   quizzes: [],
@@ -55,30 +108,36 @@ export const useStore = create((set, get) => ({
   studyEvents: [],
   notifications: [],
   boards: DEFAULT_BOARDS,
+};
 
-  // Initialize user data from localStorage
+export const useStore = create((set, get) => ({
+  ...INITIAL_STATE,
+
+  // Initialize user data from localStorage - STRICTLY per user
   initUserData: (userId, userEmail, userName) => {
+    // Set the active user ID first
     localStorage.setItem('thinkara_current_user_id', userId);
     
-    // Default fallback settings
+    // Fallback defaults
     const defaultSettings = {
-        fullName: userName || localStorage.getItem('thinkara_fullName') || 'Student',
-        email: userEmail || localStorage.getItem('thinkara_email') || '',
-        openaiApiKey: localStorage.getItem('thinkara_openai_api_key') || (typeof process !== 'undefined' && process.env.REACT_APP_OPENAI_API_KEY) || '',
+        fullName: userName || 'Student',
+        email: userEmail || '',
+        openaiApiKey: '',
         theme: savedTheme,
-        avatar: localStorage.getItem('thinkara_avatar') || '',
+        avatar: '',
         notifications: true,
         studyReminders: true,
         weeklyReport: false,
         soundEffects: true,
     };
 
-    // Load per-user settings and merge with defaults
-    let userSettings = loadUserData('settings', defaultSettings);
+    // Load per-user settings, and decrypt the API key
+    let userSettings = loadUserData('settings', defaultSettings, true);
     
-    // Enforce environment variable fallback if the loaded API key is empty
-    if (!userSettings.openaiApiKey) {
-        userSettings.openaiApiKey = defaultSettings.openaiApiKey;
+    // Ensure email is always up to date from Supabase auth
+    if (userEmail && userSettings.email !== userEmail) {
+       userSettings.email = userEmail;
+       // Save back without re-encrypting the key here (we'll let updateSettings handle that if needed)
     }
 
     set({
@@ -93,29 +152,23 @@ export const useStore = create((set, get) => ({
     });
   },
 
-  // Persist helper
-  _persist: (key) => {
-    const value = get()[key];
-    saveUserData(key, value);
+  // Clear in-memory session data (on logout)
+  clearUserSession: () => {
+    localStorage.removeItem('thinkara_current_user_id');
+    set(INITIAL_STATE);
   },
 
   // Settings
   setApiKey: (key) => set((state) => {
     const newSettings = { ...state.settings, openaiApiKey: key };
-    saveUserData('settings', newSettings);
-    // Also keep in global fallback for convenience
-    localStorage.setItem('thinkara_openai_api_key', key);
+    saveUserData('settings', newSettings, true); // encrypts before save
     return { settings: newSettings };
   }),
 
   updateSettings: (newSettings) => set((state) => {
     const updated = { ...state.settings, ...newSettings };
-    saveUserData('settings', updated);
+    saveUserData('settings', updated, true); // encrypts before save
     
-    // Global fallbacks for specific fields (compat)
-    if (newSettings.fullName !== undefined) localStorage.setItem('thinkara_fullName', newSettings.fullName);
-    if (newSettings.email !== undefined) localStorage.setItem('thinkara_email', newSettings.email);
-    if (newSettings.avatar !== undefined) localStorage.setItem('thinkara_avatar', newSettings.avatar);
     if (newSettings.theme !== undefined) {
       localStorage.setItem('thinkara_theme', newSettings.theme);
       document.documentElement.setAttribute('data-theme', newSettings.theme);

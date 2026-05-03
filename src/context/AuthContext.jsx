@@ -41,6 +41,7 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  // Sign up — Supabase will send OTP email if email confirmations are enabled
   const signUp = async (email, password, fullName) => {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -53,6 +54,28 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  // Verify OTP code sent to email
+  const verifyOtp = async (email, token) => {
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'signup'
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  // Resend OTP verification email
+  const resendVerification = async (email) => {
+    const { data, error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  // Sign in with email + password
   const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -62,7 +85,58 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  // Request password reset — sends OTP to email
+  const resetPasswordRequest = async (email) => {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) throw error;
+    return data;
+  };
+
+  // Update password (when logged in, or after reset OTP)
+  const updatePassword = async (newPassword) => {
+    const { data, error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  // Verify password reset OTP
+  const verifyPasswordResetOtp = async (email, token) => {
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'recovery'
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  // Sign out
   const signOut = async () => {
+    // Clear per-user session marker BEFORE signing out
+    localStorage.removeItem('thinkara_current_user_id');
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  };
+
+  // Delete account
+  const deleteAccount = async () => {
+    // Clear user data from localStorage first
+    const userId = user?.id;
+    if (userId) {
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(`thinkara_${userId}_`)) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+      localStorage.removeItem('thinkara_current_user_id');
+    }
+    
+    // Sign out (account deletion from Supabase requires server-side admin API)
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
@@ -72,8 +146,14 @@ export function AuthProvider({ children }) {
     session,
     loading,
     signUp,
+    verifyOtp,
+    resendVerification,
     signIn,
     signOut,
+    resetPasswordRequest,
+    updatePassword,
+    verifyPasswordResetOtp,
+    deleteAccount,
   };
 
   return (

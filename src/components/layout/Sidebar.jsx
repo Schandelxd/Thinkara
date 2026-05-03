@@ -4,13 +4,14 @@ import { useStore } from '../../store/useStore';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Sidebar() {
-  const { settings } = useStore();
+  const { settings, clearUserSession } = useStore();
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const initials = settings.fullName?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
 
   const handleLogout = async () => {
     try {
+      clearUserSession(); // Clear in-memory Zustand state
       await signOut();
       navigate('/login');
     } catch (err) {

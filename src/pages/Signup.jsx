@@ -1,18 +1,52 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Sparkles, Loader2, Mail, Lock, User, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Loader2, Mail, Lock, User, Eye, EyeOff, CheckCircle2, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { signUp } = useAuth();
+  const { signUp, verifyOtp, resendVerification } = useAuth();
+  
+  // Stages: 'details' -> 'verification' -> 'success'
+  const [stage, setStage] = useState('details');
+  
+  // Details state
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Verification state
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const otpRefs = useRef([]);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  
+  // Global state
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+
+  // Password strength check
+  const getPasswordStrength = () => {
+    if (!password) return 0;
+    let score = 0;
+    if (password.length > 6) score++;
+    if (password.length > 10) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    return Math.min(score, 4);
+  };
+  const strength = getPasswordStrength();
+  const strengthColor = ['var(--gray-300)', '#EF4444', '#F59E0B', '#10B981', '#059669'][strength];
+  const strengthLabel = ['', 'Weak', 'Fair', 'Good', 'Strong'][strength];
+
+  // Timer for resend cooldown
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -24,7 +58,8 @@ export default function Signup() {
     setIsLoading(true);
     try {
       await signUp(email, password, fullName);
-      setSuccess(true);
+      setStage('verification');
+      setResendCooldown(60); // 60s cooldown
     } catch (err) {
       setError(err.message || 'Signup failed. Please try again.');
     } finally {
@@ -32,7 +67,81 @@ export default function Signup() {
     }
   };
 
-  if (success) {
+  // OTP Input handlers
+  const handleOtpChange = (index, value) => {
+    if (value.length > 1) value = value.slice(-1); // Only allow 1 char
+    if (!/^[0-9]*$/.test(value)) return; // Only numbers
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    // Auto-advance
+    if (value && index < 5) {
+      otpRefs.current[index + 1].focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpRefs.current[index - 1].focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').slice(0, 6).split('');
+    if (pastedData.some(char => !/^[0-9]$/.test(char))) return;
+    
+    const newOtp = [...otp];
+    pastedData.forEach((char, i) => {
+      if (i < 6) newOtp[i] = char;
+    });
+    setOtp(newOtp);
+    
+    // Focus last filled input
+    const lastIndex = Math.min(pastedData.length, 5);
+    otpRefs.current[lastIndex].focus();
+  };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    const token = otp.join('');
+    if (token.length !== 6) {
+      setError('Please enter the full 6-digit code.');
+      return;
+    }
+
+    setError('');
+    setIsLoading(true);
+    try {
+      await verifyOtp(email, token);
+      setStage('success');
+      // After success, wait a bit then redirect to app
+      setTimeout(() => navigate('/app'), 2000);
+    } catch (err) {
+      setError(err.message || 'Verification failed. Please check the code.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (resendCooldown > 0) return;
+    setError('');
+    setIsLoading(true);
+    try {
+      await resendVerification(email);
+      setResendCooldown(60);
+    } catch (err) {
+      setError(err.message || 'Failed to resend code.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // --- RENDER SUCCESS ---
+  if (stage === 'success') {
     return (
       <div className="auth-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
         <div className="sticker-card" style={{ maxWidth: '440px', width: '100%', padding: '48px', textAlign: 'center', position: 'relative', zIndex: 2, animation: 'fadeInScale 0.4s ease-out' }}>
@@ -45,18 +154,100 @@ export default function Signup() {
           }}>
             <CheckCircle2 size={40} color="white" />
           </div>
-          <h1 style={{ fontSize: '28px', marginBottom: '12px' }}>Account Created! 🎉</h1>
+          <h1 style={{ fontSize: '28px', marginBottom: '12px' }}>Email Verified! 🎉</h1>
           <p style={{ color: 'var(--gray-500)', fontWeight: 500, marginBottom: '8px', lineHeight: 1.6 }}>
-            Check your email for a confirmation link, then sign in.
+            Your account is ready. Taking you to your dashboard...
           </p>
-          <Link to="/login" className="btn-primary" style={{ textDecoration: 'none', marginTop: '24px', display: 'inline-flex' }}>
-            Go to Sign In
-          </Link>
+          <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center' }}>
+             <Loader2 size={24} style={{ color: 'var(--primary)', animation: 'spin 1s linear infinite' }} />
+          </div>
         </div>
       </div>
     );
   }
 
+  // --- RENDER VERIFICATION ---
+  if (stage === 'verification') {
+    return (
+      <div className="auth-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div className="sticker-card page-enter" style={{ width: '100%', maxWidth: '440px', padding: '48px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 2 }}>
+          
+          <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'var(--card-bg-alt)', border: '2px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+            <Mail size={28} color="var(--primary)" />
+          </div>
+          
+          <h1 className="stagger-1" style={{ fontSize: '28px', marginBottom: '8px', textAlign: 'center' }}>Check your email</h1>
+          <p className="stagger-2" style={{ color: 'var(--gray-500)', fontWeight: 500, marginBottom: '32px', textAlign: 'center', fontSize: '15px', lineHeight: 1.5 }}>
+            We sent a 6-digit verification code to<br/>
+            <strong style={{ color: 'var(--fg)' }}>{email}</strong>
+          </p>
+
+          {error && (
+            <div style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', marginBottom: '20px', backgroundColor: '#FEE2E2', border: '2px solid #EF4444', color: '#DC2626', fontSize: '14px', fontWeight: 600, animation: 'fadeInUp 0.2s ease-out' }}>
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleVerify} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            
+            <div className="stagger-3" style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }} onPaste={handlePaste}>
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  ref={(el) => (otpRefs.current[index] = el)}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                  onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                  disabled={isLoading}
+                  style={{
+                    width: '48px', height: '56px', fontSize: '24px', fontWeight: 800, textAlign: 'center',
+                    borderRadius: '12px', border: `2px solid ${digit ? 'var(--primary)' : 'var(--border-color)'}`,
+                    backgroundColor: 'var(--card-bg)', color: 'var(--fg)', outline: 'none',
+                    transition: 'all 0.2s', boxShadow: digit ? '2px 2px 0 var(--primary)' : 'none'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = 'var(--primary)';
+                    e.target.style.boxShadow = '2px 2px 0 var(--primary)';
+                  }}
+                  onBlur={(e) => {
+                    if (!digit) {
+                      e.target.style.borderColor = 'var(--border-color)';
+                      e.target.style.boxShadow = 'none';
+                    }
+                  }}
+                />
+              ))}
+            </div>
+
+            <button type="submit" className="btn-primary stagger-4" disabled={isLoading || otp.join('').length !== 6}
+              style={{ width: '100%', padding: '14px', fontSize: '18px', opacity: (isLoading || otp.join('').length !== 6) ? 0.7 : 1 }}>
+              {isLoading ? <><Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> Verifying...</> : <><Sparkles size={20} /> Verify Account</>}
+            </button>
+          </form>
+
+          <div className="stagger-4" style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+            <button 
+              type="button" 
+              onClick={handleResend}
+              disabled={resendCooldown > 0 || isLoading}
+              style={{ color: resendCooldown > 0 ? 'var(--gray-400)' : 'var(--primary)', fontWeight: 700, fontSize: '14px', transition: 'color 0.2s' }}
+            >
+              {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend Code'}
+            </button>
+            <button onClick={() => setStage('details')} style={{ color: 'var(--gray-500)', fontSize: '14px', fontWeight: 600 }}>
+              ← Change Email
+            </button>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+  // --- RENDER DETAILS (Default) ---
   return (
     <div className="auth-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
       
@@ -105,7 +296,13 @@ export default function Signup() {
           </div>
 
           <div className="stagger-3" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontWeight: 700, fontSize: '14px' }}>Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+               <label style={{ fontWeight: 700, fontSize: '14px' }}>Password</label>
+               {password.length > 0 && (
+                 <span style={{ fontSize: '12px', fontWeight: 700, color: strengthColor }}>{strengthLabel}</span>
+               )}
+            </div>
+            
             <div style={{ position: 'relative' }}>
               <Lock size={18} color="var(--gray-400)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
               <input type={showPassword ? 'text' : 'password'} placeholder="Min 6 characters" className="input-base" required
@@ -116,11 +313,23 @@ export default function Signup() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            
+            {/* Password strength meter */}
+            {password.length > 0 && (
+              <div style={{ display: 'flex', gap: '4px', height: '4px', marginTop: '2px' }}>
+                {[1, 2, 3, 4].map((level) => (
+                  <div key={level} style={{ 
+                    flex: 1, borderRadius: '2px', transition: 'background-color 0.3s',
+                    backgroundColor: strength >= level ? strengthColor : 'var(--gray-200)' 
+                  }} />
+                ))}
+              </div>
+            )}
           </div>
 
           <button type="submit" className="btn-primary stagger-4" disabled={isLoading}
             style={{ width: '100%', marginTop: '8px', padding: '14px', fontSize: '18px', opacity: isLoading ? 0.7 : 1 }}>
-            {isLoading ? <><Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> Creating account...</> : <><Sparkles size={20} /> Create Account</>}
+            {isLoading ? <><Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> Creating account...</> : <>Continue <ArrowRight size={20} /></>}
           </button>
         </form>
 
