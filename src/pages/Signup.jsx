@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { signUp, verifyOtp, resendVerification } = useAuth();
+  const { signUp, verifyOtp, resendVerification, signOut } = useAuth();
   
   // Stages: 'details' -> 'verification' -> 'success'
   const [stage, setStage] = useState('details');
@@ -116,9 +116,10 @@ export default function Signup() {
     setIsLoading(true);
     try {
       await verifyOtp(email, token);
+      await signOut(); // Ensure they are signed out to force manual login next
       setStage('success');
-      // After success, wait a bit then redirect to app
-      setTimeout(() => navigate('/app'), 2000);
+      // After success, wait a bit then redirect to login page
+      setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
       setError(err.message || 'Verification failed. Please check the code.');
     } finally {
@@ -156,7 +157,7 @@ export default function Signup() {
           </div>
           <h1 style={{ fontSize: '28px', marginBottom: '12px' }}>Email Verified! 🎉</h1>
           <p style={{ color: 'var(--gray-500)', fontWeight: 500, marginBottom: '8px', lineHeight: 1.6 }}>
-            Your account is ready. Taking you to your dashboard...
+            Your account is ready. Taking you to the login page...
           </p>
           <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center' }}>
              <Loader2 size={24} style={{ color: 'var(--primary)', animation: 'spin 1s linear infinite' }} />

@@ -117,19 +117,18 @@ export default function Login() {
 
   // --- PREMIUM LOADING UI ---
   if (isLoading && !loginSuccess && !error && stage === 'login') {
+    const loadingText = "THINKARA".split('');
     return (
       <div className="auth-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="premium-loading-container">
-          <div className="premium-logo-wrapper">
-            <img src="/logo.png" alt="Thinkara Logo" className="premium-logo" />
+        <div className="premium-loading-container" style={{ gap: '24px' }}>
+          <div className="cool-text-loader">
+            {loadingText.map((char, index) => (
+              <span key={index}>{char}</span>
+            ))}
           </div>
-          <div className="premium-loading-text">
-            <span>Authenticating</span>
-            <span className="premium-loading-dots"></span>
+          <div style={{ color: 'var(--gray-500)', fontWeight: 700, animation: 'fadeInUp 0.6s ease-out 0.2s both', fontSize: '16px', letterSpacing: '2px', opacity: 0.8 }}>
+            AUTHENTICATING...
           </div>
-          <p style={{ color: 'var(--gray-500)', marginTop: '8px', fontWeight: 500, animation: 'fadeInUp 0.6s ease-out 0.2s both' }}>
-            Preparing your study session...
-          </p>
         </div>
       </div>
     );
