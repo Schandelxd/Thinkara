@@ -124,9 +124,9 @@ export default function Settings() {
         <p style={{ fontSize: '18px', color: 'var(--gray-500)', fontWeight: 500 }}>Customize Thinkara to match your style.</p>
       </header>
 
-      <div style={{ display: 'flex', gap: '32px' }}>
+      <div className="responsive-flex" style={{ gap: '32px' }}>
         {/* Sidebar Nav */}
-        <div style={{ flex: '0 0 200px' }}>
+        <div style={{ flex: '0 0 auto', minWidth: '200px' }}>
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px', position: 'sticky', top: '120px' }}>
             {sections.map((s) => (
               <button key={s.key} onClick={() => setActiveSection(s.key)}
@@ -176,7 +176,7 @@ export default function Settings() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div className="responsive-grid-2" style={{ gap: '20px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <label style={{ fontWeight: 700, fontSize: '14px' }}>Full Name</label>
                   <input type="text" className="input-base" value={settings.fullName} onChange={(e) => updateSettings({ fullName: e.target.value })} />
@@ -198,7 +198,7 @@ export default function Settings() {
               <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>Theme</h2>
               <p style={{ color: 'var(--gray-500)', fontWeight: 500, marginBottom: '24px' }}>Choose a look that works for you.</p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+              <div className="responsive-grid-2" style={{ gap: '16px' }}>
                 {THEMES.map((theme) => {
                   const isActive = settings.theme === theme.key;
                   return (
@@ -347,7 +347,7 @@ export default function Settings() {
               </div>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderRadius: '12px', border: '2px solid var(--gray-200)' }}>
+                <div className="responsive-flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start', padding: '16px', borderRadius: '12px', border: '2px solid var(--gray-200)' }}>
                   <div>
                     <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>Clear Local Data</h3>
                     <p style={{ fontSize: '14px', color: 'var(--gray-500)', fontWeight: 500 }}>Remove all materials, flashcards, quizzes, and scores from this device.</p>
@@ -358,7 +358,7 @@ export default function Settings() {
                   </button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px', borderRadius: '12px', border: '2px solid #FEE2E2', backgroundColor: '#FEF2F2' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div className="responsive-flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px', color: '#EF4444' }}>Delete Account</h3>
                       <p style={{ fontSize: '14px', color: 'var(--gray-500)', fontWeight: 500 }}>Permanently delete your account and all data. This cannot be undone.</p>

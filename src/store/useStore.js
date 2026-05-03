@@ -108,6 +108,7 @@ const INITIAL_STATE = {
   studyEvents: [],
   notifications: [],
   boards: DEFAULT_BOARDS,
+  isSidebarOpen: false,
 };
 
 export const useStore = create((set, get) => ({
@@ -157,6 +158,10 @@ export const useStore = create((set, get) => ({
     localStorage.removeItem('thinkara_current_user_id');
     set(INITIAL_STATE);
   },
+
+  // UI State
+  toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+  closeSidebar: () => set({ isSidebarOpen: false }),
 
   // Settings
   setApiKey: (key) => set((state) => {

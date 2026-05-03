@@ -49,7 +49,7 @@ export default function StudyPlanner() {
 
   return (
     <div style={{ paddingBottom: '48px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px' }}>
         <div>
           <h1 style={{ fontSize: '36px', marginBottom: '8px' }}>Study Planner</h1>
           <p style={{ fontSize: '18px', color: 'var(--gray-500)', fontWeight: 500 }}>Organize your study schedule and stay on track.</p>
@@ -62,7 +62,7 @@ export default function StudyPlanner() {
 
       <div className="layout-grid">
         {/* Calendar Widget */}
-        <div style={{ gridColumn: 'span 4' }}>
+        <div className="col-span-4">
           <div className="sticker-card" style={{ padding: '24px', marginBottom: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '20px' }}>{currentMonth} {currentYear}</h2>
@@ -127,7 +127,7 @@ export default function StudyPlanner() {
         </div>
 
         {/* Daily Schedule */}
-        <div style={{ gridColumn: 'span 8' }}>
+        <div className="col-span-8">
           <h2 style={{ fontSize: '24px', marginBottom: '24px' }}>Today's Schedule</h2>
           
           {todayEvents.length === 0 ? (
@@ -218,12 +218,12 @@ export default function StudyPlanner() {
               <button onClick={() => setShowModal(false)} style={{ color: 'var(--gray-400)' }}><X size={24} /></button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="responsive-flex" style={{ gap: '16px' }}>
               <div>
                 <label style={{ fontWeight: 700, fontSize: '14px', display: 'block', marginBottom: '6px' }}>Session Title *</label>
                 <input className="input-base" placeholder="e.g., Biology Chapter 5 Review" value={newEvent.title} onChange={e => setNewEvent({ ...newEvent, title: e.target.value })} />
               </div>
-              <div style={{ display: 'flex', gap: '16px' }}>
+              <div className="responsive-flex" style={{ gap: '16px' }}>
                 <div style={{ flex: 1 }}>
                   <label style={{ fontWeight: 700, fontSize: '14px', display: 'block', marginBottom: '6px' }}>Date *</label>
                   <input className="input-base" type="date" value={newEvent.date} onChange={e => setNewEvent({ ...newEvent, date: e.target.value })} />
@@ -233,7 +233,7 @@ export default function StudyPlanner() {
                   <input className="input-base" type="time" value={newEvent.time} onChange={e => setNewEvent({ ...newEvent, time: e.target.value })} />
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '16px' }}>
+              <div className="responsive-flex" style={{ gap: '16px' }}>
                 <div style={{ flex: 1 }}>
                   <label style={{ fontWeight: 700, fontSize: '14px', display: 'block', marginBottom: '6px' }}>Duration</label>
                   <input className="input-base" placeholder="e.g., 1 hour" value={newEvent.duration} onChange={e => setNewEvent({ ...newEvent, duration: e.target.value })} />

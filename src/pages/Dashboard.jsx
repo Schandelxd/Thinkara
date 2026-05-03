@@ -32,7 +32,7 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="layout-grid" style={{ marginBottom: '48px' }}>
         {stats.map((stat, i) => (
-          <div key={i} className="sticker-card" style={{ gridColumn: 'span 3', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div key={i} className="sticker-card col-span-3" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: stat.color, border: '2px solid var(--fg)', boxShadow: 'var(--shadow-hard-small)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <stat.icon size={24} color="var(--fg)" />
             </div>
@@ -47,8 +47,8 @@ export default function Dashboard() {
 
       <div className="layout-grid">
         {/* Recent Materials */}
-        <div style={{ gridColumn: 'span 8' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div className="col-span-8">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
             <h2 style={{ fontSize: '24px' }}>Recent Materials</h2>
             <button className="btn-secondary" style={{ padding: '8px 16px' }} onClick={() => navigate('/app/materials')}>
               View All <ArrowRight size={16} />
@@ -85,7 +85,7 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Quiz Scores */}
-        <div style={{ gridColumn: 'span 4' }}>
+        <div className="col-span-4">
           <h2 style={{ fontSize: '24px', marginBottom: '24px' }}>Recent Scores</h2>
           {recentScores.length === 0 ? (
             <div className="sticker-card" style={{ padding: '24px', backgroundColor: 'var(--gray-50)', textAlign: 'center' }}>

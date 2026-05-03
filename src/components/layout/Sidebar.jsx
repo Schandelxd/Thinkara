@@ -4,7 +4,7 @@ import { useStore } from '../../store/useStore';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Sidebar() {
-  const { settings, clearUserSession } = useStore();
+  const { settings, clearUserSession, closeSidebar } = useStore();
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const initials = settings.fullName?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
@@ -43,12 +43,13 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px', overflowY: 'auto', paddingRight: '8px' }}>
         {links.map((link) => (
           <NavLink
             key={link.path}
             to={link.path}
             end={link.path === '/app'}
+            onClick={closeSidebar}
             style={({ isActive }) => ({
               display: 'flex',
               alignItems: 'center',
@@ -79,6 +80,7 @@ export default function Sidebar() {
       <div style={{ borderTop: '2px solid var(--gray-200)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <NavLink
           to="/app/settings"
+          onClick={closeSidebar}
           style={({ isActive }) => ({
             display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 14px', borderRadius: '10px',
             textDecoration: 'none', fontWeight: 600, fontSize: '14px',

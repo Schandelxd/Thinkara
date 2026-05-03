@@ -8,7 +8,7 @@ import { useStore } from '../../store/useStore.js';
 
 export default function MainLayout() {
   const { user } = useAuth();
-  const { initUserData } = useStore();
+  const { initUserData, isSidebarOpen, closeSidebar } = useStore();
 
   useEffect(() => {
     if (user) {
@@ -17,14 +17,20 @@ export default function MainLayout() {
   }, [user, initUserData]);
 
   return (
-    <div className="layout-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg)' }}>
-      {/* Sidebar - fixed width */}
-      <div style={{ width: '280px', flexShrink: 0 }}>
+    <div className="layout-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg)', overflow: 'hidden' }}>
+      
+      {/* Sidebar Overlay (Mobile) */}
+      {isSidebarOpen && (
+        <div className="sidebar-overlay mobile-only" onClick={closeSidebar}></div>
+      )}
+
+      {/* Sidebar */}
+      <div className={`sidebar-wrapper ${isSidebarOpen ? 'open' : ''}`}>
         <Sidebar />
       </div>
       
       {/* Main Content Area with animated background */}
-      <div className="page-bg" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div className="page-bg" style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '0' }}>
         {/* Floating geometric shapes */}
         <div className="geo-shapes">
           <div className="shape shape-1"></div>
@@ -35,7 +41,7 @@ export default function MainLayout() {
         </div>
         
         <TopNav />
-        <main style={{ padding: '48px', flex: 1, overflowY: 'auto', position: 'relative', zIndex: 1 }}>
+        <main className="page-padding" style={{ flex: 1, overflowY: 'auto', position: 'relative', zIndex: 1 }}>
           <Outlet />
         </main>
       </div>

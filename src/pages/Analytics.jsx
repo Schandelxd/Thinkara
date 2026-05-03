@@ -40,7 +40,7 @@ export default function Analytics() {
       </div>
 
       <div className="layout-grid" style={{ marginBottom: '48px' }}>
-        <div className="sticker-card" style={{ gridColumn: 'span 3', padding: '24px', backgroundColor: 'var(--primary)', color: 'white' }}>
+        <div className="sticker-card col-span-3" style={{ padding: '24px', backgroundColor: 'var(--primary)', color: 'white' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <FileText size={24} />
             <span style={{ fontWeight: 600, fontSize: '18px' }}>Materials</span>
@@ -51,7 +51,7 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="sticker-card" style={{ gridColumn: 'span 3', padding: '24px' }}>
+        <div className="sticker-card col-span-3" style={{ padding: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', color: 'var(--gray-600)' }}>
             <Target size={24} />
             <span style={{ fontWeight: 600, fontSize: '18px', color: 'var(--fg)' }}>Avg Quiz Score</span>
@@ -63,7 +63,7 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="sticker-card" style={{ gridColumn: 'span 3', padding: '24px' }}>
+        <div className="sticker-card col-span-3" style={{ padding: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', color: 'var(--gray-600)' }}>
             <BookOpen size={24} />
             <span style={{ fontWeight: 600, fontSize: '18px', color: 'var(--fg)' }}>Flashcards</span>
@@ -74,7 +74,7 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="sticker-card" style={{ gridColumn: 'span 3', padding: '24px', backgroundColor: 'var(--secondary)', color: 'white' }}>
+        <div className="sticker-card col-span-3" style={{ padding: '24px', backgroundColor: 'var(--secondary)', color: 'white' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <Award size={24} />
             <span style={{ fontWeight: 600, fontSize: '18px' }}>Quizzes Taken</span>
@@ -87,7 +87,7 @@ export default function Analytics() {
       </div>
 
       <div className="layout-grid">
-        <div className="sticker-card" style={{ gridColumn: 'span 8', padding: '32px' }}>
+        <div className="sticker-card col-span-8" style={{ padding: '32px' }}>
           <h2 style={{ fontSize: '24px', marginBottom: '32px' }}>
             <BarChart3 size={24} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
             Quiz Performance
@@ -123,7 +123,7 @@ export default function Analytics() {
           )}
         </div>
 
-        <div className="sticker-card" style={{ gridColumn: 'span 4', padding: '32px', backgroundColor: 'var(--tertiary)' }}>
+        <div className="sticker-card col-span-4" style={{ padding: '32px', backgroundColor: 'var(--tertiary)' }}>
           <h2 style={{ fontSize: '24px', marginBottom: '24px' }}>Material Breakdown</h2>
           {subjects.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--gray-600)' }}>
@@ -149,7 +149,7 @@ export default function Analytics() {
 
         {/* Recent quiz scores table */}
         {quizScores.length > 0 && (
-          <div className="sticker-card" style={{ gridColumn: 'span 12', padding: '32px' }}>
+          <div className="sticker-card col-span-12" style={{ padding: '32px' }}>
             <h2 style={{ fontSize: '24px', marginBottom: '24px' }}>Quiz History</h2>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>

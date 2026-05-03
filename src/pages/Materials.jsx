@@ -209,7 +209,7 @@ export default function Materials() {
 
   return (
     <div style={{ paddingBottom: '48px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px' }}>
         <div>
           <h1 style={{ fontSize: '36px', marginBottom: '8px' }}>Study Materials</h1>
           <p style={{ fontSize: '18px', color: 'var(--gray-500)', fontWeight: 500 }}>Upload documents for AI-powered study aids generation.</p>
@@ -265,9 +265,9 @@ export default function Materials() {
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '24px' }}>Your Documents <span style={{ color: 'var(--gray-400)', fontSize: '16px' }}>({materials.length})</span></h2>
-        <div style={{ position: 'relative', width: '300px' }}>
+        <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
           <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-400)' }} />
           <input 
             type="text" 
@@ -282,7 +282,7 @@ export default function Materials() {
 
       <div className="layout-grid">
         {filteredMaterials.map((file) => (
-          <div key={file.id} className="sticker-card" style={{ gridColumn: 'span 4', padding: '24px', display: 'flex', flexDirection: 'column' }}>
+          <div key={file.id} className="sticker-card col-span-4" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
               <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--quaternary)', border: '2px solid var(--fg)', boxShadow: 'var(--shadow-hard-small)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <FileText size={24} color="var(--fg)" />
